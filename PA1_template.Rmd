@@ -8,6 +8,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+### NOTE: Figures are in "PA1_template_files/figure-html/"
 
 ## Loading and preprocessing the data
 ```{r activity}
@@ -72,7 +73,7 @@ new_median_steps <- median(new_steps_per_day)
 ```
 
 The mean and median of total number of steps taken per day are 
-`r as.integer(new_mean_steps)` and `r new_median_steps` respectively. These values differ from 
+`r as.integer(new_mean_steps)` and `r as.integer(new_median_steps)` respectively. These values differ from 
 previously computed values from original data. Imputing missing values has improved the estimates for 
 total number of steps per day, as now mean and median coincide. 
 
@@ -91,11 +92,11 @@ complete_activity$day <- sapply(complete_activity$day,function(x)
         
 )
 ```
-```{r steps_per_interval}
-intervals<- as.factor(complete_activity$interval)
-num_int <- length(levels(intervals))
+```{r weekday_weekend}
+intervals<- complete_activity$interval
+num_int <- length(unique(intervals))
 
-pdat <- data.frame(rep(levels(intervals),2))
+pdat <- data.frame(rep(unique(intervals),2))
 names(pdat) <- "interval"
  
 pdat$day <- rep("weekend",2*num_int)
@@ -107,7 +108,7 @@ pdat$steps[1:num_int] <-tapply(complete_activity$steps[complete_activity$day=="w
                                mean)
 
 pdat$day[(num_int+1):(2*num_int)] <- "weekday"
-pdat$day <- as.factor(pdat$day)
+#pdat$day <- as.factor(pdat$day)
 pdat$steps[(num_int+1):(2*num_int)] <-
         tapply(complete_activity$steps[complete_activity$day=="weekday"],
                         intervals[complete_activity$day=="weekday"],
@@ -115,9 +116,11 @@ pdat$steps[(num_int+1):(2*num_int)] <-
 
 library(lattice)
 xyplot(steps~interval | day, data = pdat,
-      type = 'l',
+     type = 'l',
       xlab = 'Interval',
       ylab = 'Number of Steps',
       layout = c(1,2))
+
 ```
 
+On Weekdays the person is equally active through the daytime, whereas on weekends there is high level of activity(maybe he/she excercises) in late morning and then it decreases sharply (maybe watching movies).
