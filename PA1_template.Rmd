@@ -30,11 +30,48 @@ The mean and median of total number of steps taken per day are
 
 ## What is the average daily activity pattern?
 
+```{r steps_per_interval}
+intervals<- as.factor(activity$interval[!is.na(activity$steps)])
+steps_per_interval <- tapply(activity$steps[!is.na(activity$steps)],
+                             intervals,mean)
+plot(levels(intervals),steps_per_interval,type="l",col="blue",
+     xlab="interval", ylab="average steps",main="Average Daily Activity")
 
+max_activiy_interval <- names(which.max(steps_per_interval))
+```
 
+The interval `r max_activiy_interval` on average contains the maximum number of steps.
 
 ## Imputing missing values
+```{r num_missing}
+num_missing <- sum(is.na(activity$steps))
+```
 
+There are `r num_missing` missing values for steps in the activity data.
 
+We impute the missing values with the average number of steps for the corresponding interval and create a new data set names `complete_activity`.
+
+```{r complete_activity}
+# New data set
+complete_activity <- activity
+complete_activity$steps[is.na(activity$steps)]  <- sapply(activity$interval[is.na(activity$steps)], 
+                                                        function(x,steps_per_interval)
+                                                        steps_per_interval[toString(x)],
+                                                        steps_per_interval)
+
+```
+
+```{r new_steps_per_day}
+# Average number of steps per day
+new_steps_per_day <- tapply(complete_activity$steps,complete_activity$date,FUN=sum)
+hist(new_steps_per_day,col="red",
+     main="Total number steps taken per day for imputed data",
+     xlab="steps per day")
+new_mean_steps <- mean(new_steps_per_day)
+new_median_steps <- median(new_steps_per_day)
+```
+
+The mean and median of total number of steps taken per day are 
+`r as.integer(new_mean_steps)` and `r new_median_steps` respectively.
 
 ## Are there differences in activity patterns between weekdays and weekends?
