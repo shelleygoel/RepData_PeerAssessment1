@@ -79,7 +79,7 @@ total number of steps per day, as now mean and median coincide.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r weekday}
+```{r complete_activity$day}
 complete_activity$day <- weekdays(as.POSIXlt(complete_activity$date))
 complete_activity$day <- sapply(complete_activity$day,function(x) 
                                                         if (x=="Saturday" | x== "Sunday"){
@@ -93,20 +93,31 @@ complete_activity$day <- sapply(complete_activity$day,function(x)
 ```
 ```{r steps_per_interval}
 intervals<- as.factor(complete_activity$interval)
+num_int <- length(levels(intervals))
 
-pdat <- data.frame(rep(intervals,2))
+pdat <- data.frame(rep(levels(intervals),2))
+names(pdat) <- "interval"
  
-pdat$day <- rep("weekend",length(intervals))
+pdat$day <- rep("weekend",2*num_int)
 
-pdat$steps <-tapply(complete_activity$steps[complete_activity$day=="weekend"],
-                        intervals[complete_activity$day=="weekend"],
-                        mean)
+pdat$steps <- rep(0,2*num_int)
 
-pdat$day[length(intervals)/2:] <- "weekday"
-pdat$steps <- tapply(complete_activity$steps[complete_activity$day=="weekday"],
+pdat$steps[1:num_int] <-tapply(complete_activity$steps[complete_activity$day=="weekend"],
+                               intervals[complete_activity$day=="weekend"],
+                               mean)
+
+pdat$day[(num_int+1):(2*num_int)] <- "weekday"
+pdat$day <- as.factor(pdat$day)
+pdat$steps[(num_int+1):(2*num_int)] <-
+        tapply(complete_activity$steps[complete_activity$day=="weekday"],
                         intervals[complete_activity$day=="weekday"],
                         mean)
 
-
+library(lattice)
+xyplot(steps~interval | day, data = pdat,
+      type = 'l',
+      xlab = 'Interval',
+      ylab = 'Number of Steps',
+      layout = c(1,2))
 ```
 
