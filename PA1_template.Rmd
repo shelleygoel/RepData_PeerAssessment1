@@ -72,6 +72,41 @@ new_median_steps <- median(new_steps_per_day)
 ```
 
 The mean and median of total number of steps taken per day are 
-`r as.integer(new_mean_steps)` and `r new_median_steps` respectively.
+`r as.integer(new_mean_steps)` and `r new_median_steps` respectively. These values differ from 
+previously computed values from original data. Imputing missing values has improved the estimates for 
+total number of steps per day, as now mean and median coincide. 
+
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r weekday}
+complete_activity$day <- weekdays(as.POSIXlt(complete_activity$date))
+complete_activity$day <- sapply(complete_activity$day,function(x) 
+                                                        if (x=="Saturday" | x== "Sunday"){
+                                                                return("weekend")
+                                                        }
+                                                        else {
+                                                                return("weekday")
+                                                        }
+        
+)
+```
+```{r steps_per_interval}
+intervals<- as.factor(complete_activity$interval)
+
+pdat <- data.frame(rep(intervals,2))
+ 
+pdat$day <- rep("weekend",length(intervals))
+
+pdat$steps <-tapply(complete_activity$steps[complete_activity$day=="weekend"],
+                        intervals[complete_activity$day=="weekend"],
+                        mean)
+
+pdat$day[length(intervals)/2:] <- "weekday"
+pdat$steps <- tapply(complete_activity$steps[complete_activity$day=="weekday"],
+                        intervals[complete_activity$day=="weekday"],
+                        mean)
+
+
+```
+
